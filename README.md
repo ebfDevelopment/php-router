@@ -5,25 +5,25 @@ Sistema de roteamento PHP simples, poderoso e flexível com suporte a grupos, mi
 [![PHP Version](https://img.shields.io/badge/php-%3E%3D7.4-blue.svg)](https://php.net)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-## 📋 Características
+## Características
 
-- ✅ Suporte a todos os métodos HTTP (GET, POST, PUT, DELETE, PATCH)
-- ✅ Parâmetros dinâmicos e opcionais nas rotas
-- ✅ Grupos de rotas com prefixos
-- ✅ Sistema completo de middlewares
-- ✅ Rotas nomeadas
-- ✅ Suporte a closures
-- ✅ Separador customizável (::, @, etc)
-- ✅ Grupos aninhados ilimitados
-- ✅ Zero dependências
+- Suporte a todos os métodos HTTP (GET, POST, PUT, DELETE, PATCH)
+- Parâmetros dinâmicos e opcionais nas rotas
+- Grupos de rotas com prefixos
+- Sistema completo de middlewares
+- Rotas nomeadas
+- Suporte a closures
+- Separador customizável (::, @, etc)
+- Grupos aninhados ilimitados
+- Zero dependências
 
-## 📦 Instalação
+## Instalação
 
 ```bash
 composer require edifonttes/php-router
 ```
 
-## 🚀 Uso Básico
+## Uso Básico
 
 ### Configuração Inicial
 
@@ -60,7 +60,7 @@ RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
 ```
 
-## 📖 Documentação
+## Documentação
 
 ### Métodos HTTP
 
@@ -234,7 +234,7 @@ $dispatcher->setErrorHandler(function($exception) {
 $dispatcher->dispatch();
 ```
 
-## 🎯 Exemplos Completos
+## Exemplos Completos
 
 ### API RESTful
 
@@ -285,7 +285,7 @@ $router->group(['prefix' => 'admin', 'middleware' => ['auth', 'admin']], functio
 });
 ```
 
-## 🔧 Métodos Úteis
+## Métodos Úteis
 
 ```php
 // Listar todas as rotas (debug)
@@ -302,7 +302,7 @@ $router->clear();
 MiddlewareManager::clear();
 ```
 
-## 📚 Estrutura Recomendada
+## Estrutura Recomendada
 
 ```
 seu-projeto/
@@ -351,7 +351,7 @@ $dispatcher = new Dispatcher($router);
 $dispatcher->dispatch();
 ```
 
-## 🤝 Contribuindo
+## Contribuindo
 
 Contribuições são bem-vindas! Por favor:
 
@@ -361,19 +361,19 @@ Contribuições são bem-vindas! Por favor:
 4. Push para a branch (`git push origin feature/MinhaFeature`)
 5. Abra um Pull Request
 
-## 📄 Licença
+## Licença
 
 Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
 
-## 🙏 Créditos
+## Créditos
 
-Desenvolvido por [Seu Nome](https://github.com/seu-usuario)
+Desenvolvido por [Edivan B. Fontes]([https://github.com/seu-usuario](https://github.com/ebfDevelopment))
 
-## 📞 Suporte
+## Suporte
 
-- **Issues**: [GitHub Issues](https://github.com/seu-usuario/simple-router/issues)
-- **Email**: seu@email.com
+- **Issues**: [https://github.com/ebfDevelopment/php-router/issues)
+- **Email**: ebezerradevelopment@gmail.com
 
 ---
 
-⭐ Se este projeto te ajudou, considere dar uma estrela no GitHub!
+Se este projeto te ajudou, considere dar uma estrela no GitHub!
