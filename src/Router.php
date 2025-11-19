@@ -8,7 +8,6 @@ class Router
     private $separator = '::';
     private $groupPrefix = '';
     private $groupMiddleware = [];
-    private $namedRoutes = [];
 
     /**
      * Define o separador entre controller e método
@@ -42,8 +41,8 @@ class Router
 
         // Adiciona middleware do grupo
         if (isset($attributes['middleware'])) {
-            $middleware = is_array($attributes['middleware']) 
-                ? $attributes['middleware'] 
+            $middleware = is_array($attributes['middleware'])
+                ? $attributes['middleware']
                 : [$attributes['middleware']];
             $this->groupMiddleware = array_merge($this->groupMiddleware, $middleware);
         }
@@ -59,83 +58,70 @@ class Router
     /**
      * Adiciona uma rota GET
      */
-    public function get(string $path, $handler, ?string $method = null): self
+    public function get(string $path, $handler, ?string $method = null): void
     {
-        return $this->addRoute('GET', $path, $handler, $method);
+        $this->addRoute('GET', $path, $handler, $method);
     }
 
     /**
      * Adiciona uma rota POST
      */
-    public function post(string $path, $handler, ?string $method = null): self
+    public function post(string $path, $handler, ?string $method = null): void
     {
-        return $this->addRoute('POST', $path, $handler, $method);
+        $this->addRoute('POST', $path, $handler, $method);
     }
 
     /**
      * Adiciona uma rota PUT
      */
-    public function put(string $path, $handler, ?string $method = null): self
+    public function put(string $path, $handler, ?string $method = null): void
     {
-        return $this->addRoute('PUT', $path, $handler, $method);
+        $this->addRoute('PUT', $path, $handler, $method);
     }
 
     /**
      * Adiciona uma rota DELETE
      */
-    public function delete(string $path, $handler, ?string $method = null): self
+    public function delete(string $path, $handler, ?string $method = null): void
     {
-        return $this->addRoute('DELETE', $path, $handler, $method);
+        $this->addRoute('DELETE', $path, $handler, $method);
     }
 
     /**
      * Adiciona uma rota PATCH
      */
-    public function patch(string $path, $handler, ?string $method = null): self
+    public function patch(string $path, $handler, ?string $method = null): void
     {
-        return $this->addRoute('PATCH', $path, $handler, $method);
+        $this->addRoute('PATCH', $path, $handler, $method);
     }
 
     /**
      * Adiciona múltiplas rotas de uma vez
      */
-    public function match(array $methods, string $path, $handler, ?string $method = null): self
+    public function match(array $methods, string $path, $handler, ?string $method = null): void
     {
         foreach ($methods as $httpMethod) {
             $this->addRoute(strtoupper($httpMethod), $path, $handler, $method);
         }
-        return $this;
     }
 
     /**
      * Adiciona uma rota para todos os métodos HTTP
      */
-    public function any(string $path, $handler, ?string $method = null): self
+    public function any(string $path, $handler, ?string $method = null): void
     {
-        return $this->match(['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], $path, $handler, $method);
-    }
-
-    /**
-     * Nomeia a última rota adicionada
-     */
-    public function name(string $name): self
-    {
-        if (!empty($this->routes)) {
-            $lastIndex = count($this->routes) - 1;
-            $this->namedRoutes[$name] = $this->routes[$lastIndex];
-        }
-        return $this;
+        $this->match(['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], $path, $handler, $method);
     }
 
     /**
      * Método privado para adicionar rotas
      */
-    private function addRoute(string $httpMethod, string $path, $handler, ?string $method = null): self
+    private function addRoute(string $httpMethod, string $path, $handler, ?string $method = null): void
     {
         // Aplica o prefixo do grupo
         $fullPath = $this->groupPrefix . '/' . trim($path, '/');
         $fullPath = '/' . trim($fullPath, '/');
-        
+
         // Se o path for vazio ou apenas "/", mantém "/"
         if ($fullPath === '' || $fullPath === '//') {
             $fullPath = '/';
@@ -166,8 +152,6 @@ class Router
             'method' => $method,
             'middleware' => $this->groupMiddleware
         ];
-
-        return $this;
     }
 
     /**
@@ -181,10 +165,10 @@ class Router
             }
 
             $pattern = $this->convertToRegex($route['path']);
-            
+
             if (preg_match($pattern, $url, $matches)) {
                 array_shift($matches); // Remove o match completo
-                
+
                 return [
                     'controller' => $route['controller'],
                     'method' => $route['method'],
@@ -198,38 +182,18 @@ class Router
     }
 
     /**
-     * Gera URL a partir do nome da rota
-     */
-    public function route(string $name, array $params = []): string
-    {
-        if (!isset($this->namedRoutes[$name])) {
-            throw new \Exception("Rota nomeada '{$name}' não encontrada");
-        }
-
-        $route = $this->namedRoutes[$name];
-        $path = $route['path'];
-
-        // Substitui os parâmetros
-        foreach ($params as $key => $value) {
-            $path = str_replace('{' . $key . '}', $value, $path);
-        }
-
-        return $path;
-    }
-
-    /**
      * Converte o padrão de rota para regex
      */
     private function convertToRegex(string $path): string
     {
         // Substitui {parametro} por um grupo de captura regex
         $pattern = preg_replace('/\{([a-zA-Z0-9_]+)\}/', '([a-zA-Z0-9_-]+)', $path);
-        
+
         // Substitui {parametro?} por um grupo opcional
         $pattern = preg_replace('/\{([a-zA-Z0-9_]+)\?\}/', '([a-zA-Z0-9_-]*)', $pattern);
-        
+
         $pattern = '#^' . $pattern . '$#';
-        
+
         return $pattern;
     }
 
@@ -247,12 +211,12 @@ class Router
     public function listRoutes(): array
     {
         $list = [];
-        
+
         foreach ($this->routes as $route) {
-            $handler = $route['controller'] 
+            $handler = $route['controller']
                 ? $route['controller'] . $this->separator . (is_string($route['method']) ? $route['method'] : 'Closure')
                 : 'Closure';
-                
+
             $list[] = [
                 'method' => $route['http_method'],
                 'path' => $route['path'],
@@ -260,18 +224,7 @@ class Router
                 'middleware' => $route['middleware']
             ];
         }
-        
-        return $list;
-    }
 
-    /**
-     * Limpa todas as rotas
-     */
-    public function clear(): void
-    {
-        $this->routes = [];
-        $this->namedRoutes = [];
-        $this->groupPrefix = '';
-        $this->groupMiddleware = [];
+        return $list;
     }
 }
