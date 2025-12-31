@@ -2,7 +2,18 @@
     "name": "edifonttes/php-router",
     "description": "Sistema de roteamento PHP simples, poderoso e flexível com suporte a grupos, middlewares e parâmetros dinâmicos",
     "type": "library",
-    "keywords": ["router", "routing", "php", "middleware", "mvc"],
+    "keywords": [
+        "router",
+        "routing",
+        "php",
+        "middleware",
+        "mvc",
+        "framework",
+        "authentication",
+        "cron",
+        "api",
+        "cors"
+    ],
     "license": "MIT",
     "authors": [
         {
@@ -27,5 +38,8 @@
         }
     },
     "minimum-stability": "stable",
-    "prefer-stable": true
+    "prefer-stable": true,
+    "scripts": {
+        "test": "phpunit"
+    }
 }

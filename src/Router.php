@@ -8,6 +8,7 @@ class Router
     private $separator = '::';
     private $groupPrefix = '';
     private $groupMiddleware = [];
+    private $lastRoute = null; // Para método encadeado middleware()
 
     /**
      * Define o separador entre controller e método
@@ -58,65 +59,102 @@ class Router
     /**
      * Adiciona uma rota GET
      */
-    public function get(string $path, $handler, ?string $method = null): void
+    public function get(string $path, $handler, ?string $method = null): self
     {
-        $this->addRoute('GET', $path, $handler, $method);
+        return $this->addRoute('GET', $path, $handler, $method);
     }
 
     /**
      * Adiciona uma rota POST
      */
-    public function post(string $path, $handler, ?string $method = null): void
+    public function post(string $path, $handler, ?string $method = null): self
     {
-        $this->addRoute('POST', $path, $handler, $method);
+        return $this->addRoute('POST', $path, $handler, $method);
     }
 
     /**
      * Adiciona uma rota PUT
      */
-    public function put(string $path, $handler, ?string $method = null): void
+    public function put(string $path, $handler, ?string $method = null): self
     {
-        $this->addRoute('PUT', $path, $handler, $method);
+        return $this->addRoute('PUT', $path, $handler, $method);
     }
 
     /**
      * Adiciona uma rota DELETE
      */
-    public function delete(string $path, $handler, ?string $method = null): void
+    public function delete(string $path, $handler, ?string $method = null): self
     {
-        $this->addRoute('DELETE', $path, $handler, $method);
+        return $this->addRoute('DELETE', $path, $handler, $method);
     }
 
     /**
      * Adiciona uma rota PATCH
      */
-    public function patch(string $path, $handler, ?string $method = null): void
+    public function patch(string $path, $handler, ?string $method = null): self
     {
-        $this->addRoute('PATCH', $path, $handler, $method);
+        return $this->addRoute('PATCH', $path, $handler, $method);
     }
 
     /**
      * Adiciona múltiplas rotas de uma vez
      */
-    public function match(array $methods, string $path, $handler, ?string $method = null): void
+    public function match(array $methods, string $path, $handler, ?string $method = null): self
     {
         foreach ($methods as $httpMethod) {
             $this->addRoute(strtoupper($httpMethod), $path, $handler, $method);
         }
+        return $this;
     }
 
     /**
      * Adiciona uma rota para todos os métodos HTTP
      */
-    public function any(string $path, $handler, ?string $method = null): void
+    public function any(string $path, $handler, ?string $method = null): self
     {
-        $this->match(['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], $path, $handler, $method);
+        return $this->match(['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], $path, $handler, $method);
+    }
+
+    /**
+     * Adiciona middleware(s) à última rota registrada
+     * Uso: $router->get('/rota', 'Controller::method')->middleware('auth');
+     */
+    public function middleware($middleware): self
+    {
+        if ($this->lastRoute === null) {
+            throw new \RuntimeException('Nenhuma rota definida para aplicar middleware');
+        }
+
+        $middlewares = is_array($middleware) ? $middleware : [$middleware];
+        
+        // Adiciona os middlewares à última rota
+        $this->routes[$this->lastRoute]['middleware'] = array_merge(
+            $this->routes[$this->lastRoute]['middleware'],
+            $middlewares
+        );
+
+        return $this;
+    }
+
+    /**
+     * Adiciona um nome à última rota registrada
+     * Uso: $router->get('/rota', 'Controller::method')->name('rota.nome');
+     */
+    public function name(string $name): self
+    {
+        if ($this->lastRoute === null) {
+            throw new \RuntimeException('Nenhuma rota definida para nomear');
+        }
+
+        $this->routes[$this->lastRoute]['name'] = $name;
+
+        return $this;
     }
 
     /**
      * Método privado para adicionar rotas
      */
-    private function addRoute(string $httpMethod, string $path, $handler, ?string $method = null): void
+    private function addRoute(string $httpMethod, string $path, $handler, ?string $method = null): self
     {
         // Aplica o prefixo do grupo
         $fullPath = $this->groupPrefix . '/' . trim($path, '/');
@@ -150,8 +188,14 @@ class Router
             'path' => $fullPath,
             'controller' => $controller,
             'method' => $method,
-            'middleware' => $this->groupMiddleware
+            'middleware' => $this->groupMiddleware,
+            'name' => null
         ];
+
+        // Salva o índice da última rota para métodos encadeados
+        $this->lastRoute = count($this->routes) - 1;
+
+        return $this;
     }
 
     /**
@@ -173,8 +217,34 @@ class Router
                     'controller' => $route['controller'],
                     'method' => $route['method'],
                     'params' => $matches,
-                    'middleware' => $route['middleware']
+                    'middleware' => $route['middleware'],
+                    'name' => $route['name']
                 ];
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Gera URL para uma rota nomeada
+     */
+    public function route(string $name, array $params = []): ?string
+    {
+        foreach ($this->routes as $route) {
+            if ($route['name'] === $name) {
+                $path = $route['path'];
+                
+                // Substitui parâmetros
+                foreach ($params as $key => $value) {
+                    $path = preg_replace('/\{' . $key . '\?\}/', $value, $path);
+                    $path = preg_replace('/\{' . $key . '\}/', $value, $path);
+                }
+                
+                // Remove parâmetros opcionais não preenchidos
+                $path = preg_replace('/\{[a-zA-Z0-9_]+\?\}/', '', $path);
+                
+                return $path;
             }
         }
 
@@ -221,7 +291,8 @@ class Router
                 'method' => $route['http_method'],
                 'path' => $route['path'],
                 'handler' => $handler,
-                'middleware' => $route['middleware']
+                'middleware' => $route['middleware'],
+                'name' => $route['name']
             ];
         }
 
