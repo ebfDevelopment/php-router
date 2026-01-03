@@ -342,7 +342,7 @@ Protege rotas de CRON Jobs com autenticação por token.
 
 **1. Configure o token no `.env`:**
 ```bash
-CRON_TOKEN=b3a5514697975e4daa19757391df83ce
+CRON_TOKEN=b3a5514697975e4daa19757391df83ce //Atenção//, não use este token, ele está aqui apenas como exemplo. Gere o seu token digitando, php -r "echo bin2hex(random_bytes(16));" no CMD ou no Power Shell.
 ```
 
 **2. Registre e use:**
