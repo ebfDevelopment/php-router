@@ -74,7 +74,7 @@ class AdminMiddleware extends Middleware
      */
     protected function isAjaxRequest(): bool
     {
-        return isset($_SERVER['HTTP_X_REQUESTED_WITH']) 
+        return isset($_SERVER['HTTP_X_REQUESTED_WITH'])
             && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
     }
 }

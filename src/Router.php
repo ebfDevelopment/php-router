@@ -9,6 +9,26 @@ class Router
     private $groupPrefix = '';
     private $groupMiddleware = [];
     private $lastRoute = null; // Para método encadeado middleware()
+    private $namespace = ''; // Namespace padrão para controllers
+    private $groupNamespace = ''; // Namespace do grupo atual
+
+    /**
+     * Define o namespace padrão para os controllers
+     * Uso: $router->namespace('App\\Controllers')
+     */
+    public function namespace(string $namespace): self
+    {
+        $this->namespace = trim($namespace, '\\');
+        return $this;
+    }
+
+    /**
+     * Obtém o namespace atual
+     */
+    public function getNamespace(): string
+    {
+        return $this->namespace;
+    }
 
     /**
      * Define o separador entre controller e método
@@ -34,6 +54,7 @@ class Router
     {
         $previousPrefix = $this->groupPrefix;
         $previousMiddleware = $this->groupMiddleware;
+        $previousNamespace = $this->groupNamespace;
 
         // Adiciona o prefixo do grupo
         if (isset($attributes['prefix'])) {
@@ -48,12 +69,21 @@ class Router
             $this->groupMiddleware = array_merge($this->groupMiddleware, $middleware);
         }
 
+        // Adiciona namespace do grupo
+        if (isset($attributes['namespace'])) {
+            $groupNamespace = trim($attributes['namespace'], '\\');
+            $this->groupNamespace = $this->groupNamespace
+                ? $this->groupNamespace . '\\' . $groupNamespace
+                : $groupNamespace;
+        }
+
         // Executa o callback com as rotas do grupo
         $callback($this);
 
         // Restaura os valores anteriores
         $this->groupPrefix = $previousPrefix;
         $this->groupMiddleware = $previousMiddleware;
+        $this->groupNamespace = $previousNamespace;
     }
 
     /**
@@ -126,7 +156,7 @@ class Router
         }
 
         $middlewares = is_array($middleware) ? $middleware : [$middleware];
-        
+
         // Adiciona os middlewares à última rota
         $this->routes[$this->lastRoute]['middleware'] = array_merge(
             $this->routes[$this->lastRoute]['middleware'],
@@ -183,6 +213,11 @@ class Router
             throw new \InvalidArgumentException("Formato de handler inválido");
         }
 
+        // Aplica namespace ao controller (se for string e não for um FQCN)
+        if ($controller && is_string($controller)) {
+            $controller = $this->applyNamespace($controller);
+        }
+
         $this->routes[] = [
             'http_method' => $httpMethod,
             'path' => $fullPath,
@@ -196,6 +231,33 @@ class Router
         $this->lastRoute = count($this->routes) - 1;
 
         return $this;
+    }
+
+    /**
+     * Aplica namespace ao controller se necessário
+     */
+    private function applyNamespace(string $controller): string
+    {
+        // Se já é um FQCN (começa com \), retorna como está
+        if (strpos($controller, '\\') === 0) {
+            return $controller;
+        }
+
+        // Se contém \ no meio, assume que já tem namespace completo
+        if (strpos($controller, '\\') !== false) {
+            return $controller;
+        }
+
+        // Aplica namespace do grupo primeiro (se existir)
+        $namespace = $this->groupNamespace ?: $this->namespace;
+
+        // Se não há namespace definido, retorna como está
+        if (empty($namespace)) {
+            return $controller;
+        }
+
+        // Adiciona namespace
+        return $namespace . '\\' . $controller;
     }
 
     /**
@@ -234,16 +296,16 @@ class Router
         foreach ($this->routes as $route) {
             if ($route['name'] === $name) {
                 $path = $route['path'];
-                
+
                 // Substitui parâmetros
                 foreach ($params as $key => $value) {
                     $path = preg_replace('/\{' . $key . '\?\}/', $value, $path);
                     $path = preg_replace('/\{' . $key . '\}/', $value, $path);
                 }
-                
+
                 // Remove parâmetros opcionais não preenchidos
                 $path = preg_replace('/\{[a-zA-Z0-9_]+\?\}/', '', $path);
-                
+
                 return $path;
             }
         }

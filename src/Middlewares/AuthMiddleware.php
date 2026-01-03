@@ -31,19 +31,56 @@ class AuthMiddleware extends Middleware
         if (!$this->isAuthenticated()) {
             // Se for requisição AJAX/API, retorna JSON
             if ($this->isAjaxRequest()) {
+                $redirectUrl = $this->addBasePath($this->redirectTo);
                 $this->json([
                     'success' => false,
                     'message' => 'Não autenticado',
-                    'redirect' => $this->redirectTo
+                    'redirect' => $redirectUrl
                 ], 401);
             }
 
-            // Redireciona para a página de login
-            $this->redirect($this->redirectTo);
+            // Redireciona para a página de login (usando header diretamente)
+            $redirectUrl = $this->addBasePath($this->redirectTo);
+            \header('Location: ' . $redirectUrl);
+            exit;
         }
 
         // Usuário autenticado, continua para o próximo middleware/controller
         return $next();
+    }
+
+    /**
+     * Redireciona para uma URL (considerando base path)
+     */
+    protected function redirect(string $url): void
+    {
+        if ($this->useBasePath) {
+            $url = $this->addBasePath($url);
+        }
+
+        header('Location: ' . $url);
+        exit;
+    }
+
+    /**
+     * Adiciona o base path à URL (para aplicações em subdiretórios)
+     */
+    protected function addBasePath(string $url): string
+    {
+        // Se a URL já começa com http:// ou https://, retorna como está
+        if (preg_match('/^https?:\/\//', $url)) {
+            return $url;
+        }
+
+        $scriptName = $_SERVER['SCRIPT_NAME'];
+        $basePath = str_replace('\\', '/', dirname($scriptName));
+
+        // Se o basePath não for raiz e a URL não começar com o basePath
+        if ($basePath !== '/' && strpos($url, $basePath) !== 0) {
+            $url = rtrim($basePath, '/') . '/' . ltrim($url, '/');
+        }
+
+        return $url;
     }
 
     /**
@@ -59,7 +96,7 @@ class AuthMiddleware extends Middleware
      */
     protected function isAjaxRequest(): bool
     {
-        return isset($_SERVER['HTTP_X_REQUESTED_WITH']) 
+        return isset($_SERVER['HTTP_X_REQUESTED_WITH'])
             && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
     }
 }

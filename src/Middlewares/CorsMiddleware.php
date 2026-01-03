@@ -42,7 +42,7 @@ class CorsMiddleware extends Middleware
 
         // Se for uma requisição OPTIONS (preflight), responde imediatamente
         if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-            http_response_code(200);
+            \http_response_code(200);
             exit;
         }
 
@@ -59,24 +59,24 @@ class CorsMiddleware extends Middleware
 
         // Access-Control-Allow-Origin
         if ($this->isOriginAllowed($origin)) {
-            header("Access-Control-Allow-Origin: {$origin}");
+            \header("Access-Control-Allow-Origin: {$origin}");
         } elseif (in_array('*', $this->allowedOrigins)) {
-            header('Access-Control-Allow-Origin: *');
+            \header('Access-Control-Allow-Origin: *');
         }
 
         // Access-Control-Allow-Methods
-        header('Access-Control-Allow-Methods: ' . implode(', ', $this->allowedMethods));
+        \header('Access-Control-Allow-Methods: ' . implode(', ', $this->allowedMethods));
 
         // Access-Control-Allow-Headers
-        header('Access-Control-Allow-Headers: ' . implode(', ', $this->allowedHeaders));
+        \header('Access-Control-Allow-Headers: ' . implode(', ', $this->allowedHeaders));
 
         // Access-Control-Allow-Credentials
         if ($this->allowCredentials) {
-            header('Access-Control-Allow-Credentials: true');
+            \header('Access-Control-Allow-Credentials: true');
         }
 
         // Access-Control-Max-Age
-        header("Access-Control-Max-Age: {$this->maxAge}");
+        \header("Access-Control-Max-Age: {$this->maxAge}");
     }
 
     /**

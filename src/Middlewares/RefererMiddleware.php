@@ -53,7 +53,10 @@ class RefererMiddleware extends Middleware
             }
 
             // Aborta com erro 403
-            $this->abort(403, 'Acesso negado. Origem da requisição não permitida.');
+            \http_response_code(403);
+            echo '<h1>403 - Acesso negado</h1>';
+            echo '<p>Origem da requisição não permitida.</p>';
+            exit;
         }
 
         // Referer válido, continua
@@ -147,7 +150,7 @@ class RefererMiddleware extends Middleware
      */
     protected function isAjaxRequest(): bool
     {
-        return isset($_SERVER['HTTP_X_REQUESTED_WITH']) 
+        return isset($_SERVER['HTTP_X_REQUESTED_WITH'])
             && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
     }
 

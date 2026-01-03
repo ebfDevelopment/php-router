@@ -40,11 +40,14 @@ class CronMiddleware extends Middleware
 
         // Verifica o token no header
         if (!$this->isValidToken()) {
-            $this->json([
+            \http_response_code(403);
+            \header('Content-Type: application/json');
+            echo json_encode([
                 'success' => false,
                 'message' => 'Token de autenticação inválido ou ausente',
                 'error' => 'INVALID_CRON_TOKEN'
-            ], 403);
+            ]);
+            exit;
         }
 
         // Token válido, continua
@@ -73,7 +76,7 @@ class CronMiddleware extends Middleware
     {
         // Tenta pegar do header customizado
         $headerKey = 'HTTP_' . str_replace('-', '_', strtoupper($this->headerName));
-        
+
         if (isset($_SERVER[$headerKey])) {
             return $_SERVER[$headerKey];
         }

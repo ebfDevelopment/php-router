@@ -30,7 +30,9 @@ class GuestMiddleware extends Middleware
 
         // Se o usuário JÁ está autenticado, redireciona
         if ($this->isAuthenticated()) {
-            $this->redirect($this->redirectTo);
+            $redirectUrl = $this->addBasePath($this->redirectTo);
+            \header('Location: ' . $redirectUrl);
+            exit;
         }
 
         // Usuário não está autenticado, continua (permite acesso)
