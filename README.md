@@ -342,7 +342,7 @@ Protege rotas de CRON Jobs com autenticação por token.
 
 **1. Configure o token no `.env`:**
 ```bash
-CRON_TOKEN=6b6f52d0d8faaba8a1e6dcd0109d877e
+CRON_TOKEN=b3a5514697975e4daa19757391df83ce
 ```
 
 **2. Registre e use:**
@@ -358,13 +358,13 @@ $router->group(['prefix' => 'cron', 'middleware' => 'cron'], function($router) {
 **3. Teste:**
 ```bash
 # Via Header
-curl -H "X-Cron-Auth: 6b6f52d0d8faaba8a1e6dcd0109d877e" http://localhost/cron/daily-cleanup
+curl -H "X-Cron-Auth: b3a5514697975e4daa19757391df83ce" http://localhost/cron/daily-cleanup
 
 # Via Bearer Token
-curl -H "Authorization: Bearer 6b6f52d0d8faaba8a1e6dcd0109d877e" http://localhost/cron/daily-cleanup
+curl -H "Authorization: Bearer b3a5514697975e4daa19757391df83ce" http://localhost/cron/daily-cleanup
 
 # Via Query String
-curl "http://localhost/cron/daily-cleanup?cron_token=6b6f52d0d8faaba8a1e6dcd0109d877e"
+curl "http://localhost/cron/daily-cleanup?cron_token=b3a5514697975e4daa19757391df83ce"
 ```
 
 #### Configurações Avançadas
@@ -403,7 +403,7 @@ $router->post('/webhook/payment', 'WebhookController::handle')->middleware([$cro
 **Tokens diferentes para tarefas diferentes:**
 ```bash
 # .env
-CRON_TOKEN=6b6f52d0d8faaba8a1e6dcd0109d877e
+CRON_TOKEN=b3a5514697975e4daa19757391df83ce
 BACKUP_TOKEN=abc123def456
 WEBHOOK_TOKEN=xyz789uvw456
 ```
@@ -631,7 +631,7 @@ APP_DEBUG=true
 # TOKENS DE SEGURANÇA
 # ============================================
 # Token para CRON Jobs (gere com: openssl rand -hex 32)
-CRON_TOKEN=6b6f52d0d8faaba8a1e6dcd0109d877e
+CRON_TOKEN=b3a5514697975e4daa19757391df83ce
 
 # Tokens específicos
 BACKUP_TOKEN=abc123def456
